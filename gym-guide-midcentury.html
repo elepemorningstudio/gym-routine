@@ -1,0 +1,839 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tabla Gimnasio — Peter</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f5f0e8;
+    --surface: #fffdf7;
+    --surface2: #ede8de;
+    --accent: #3b7a8c;       /* teal blue */
+    --accent-light: #d6edf2; /* pale blue tint */
+    --peach: #e8794a;        /* melocotón */
+    --peach-light: #fae8de;  /* pale peach tint */
+    --text: #2a2420;
+    --muted: #8a7f74;
+    --border: #d8d0c4;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 300;
+    min-height: 100vh;
+    padding: 0 0 72px;
+  }
+
+  /* HEADER */
+  .header {
+    background: var(--accent);
+    padding: 20px 20px 16px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .header-top {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+
+  .header h1 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 30px;
+    letter-spacing: 3px;
+    color: #fff;
+    line-height: 1;
+  }
+
+  .header .subtitle {
+    font-size: 11px;
+    color: rgba(255,255,255,0.6);
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+  }
+
+  /* TABS */
+  .tabs {
+    display: flex;
+    gap: 8px;
+  }
+
+  .tab {
+    flex: 1;
+    padding: 10px;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-radius: 6px;
+    background: transparent;
+    color: rgba(255,255,255,0.6);
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 17px;
+    letter-spacing: 2px;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: center;
+  }
+
+  .tab.active {
+    background: var(--peach);
+    color: #fff;
+    border-color: var(--peach);
+  }
+
+  /* CONTENT */
+  .day-panel {
+    display: none;
+    padding: 16px 16px 0;
+    animation: fadeIn 0.2s ease;
+  }
+
+  .day-panel.active { display: block; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* STATS ROW */
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+
+  .stat {
+    background: var(--accent-light);
+    border: 1px solid #b8d8e4;
+    border-radius: 8px;
+    padding: 10px;
+    text-align: center;
+  }
+
+  .stat-value {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 22px;
+    color: var(--accent);
+    line-height: 1;
+  }
+
+  .stat-label {
+    font-size: 10px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-top: 2px;
+  }
+
+  /* EXERCISE CARD */
+  .exercise-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    margin-bottom: 10px;
+    overflow: hidden;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+
+  .exercise-card.open {
+    border-color: var(--accent);
+    box-shadow: 0 2px 12px rgba(59,122,140,0.12);
+  }
+
+  .exercise-header {
+    display: flex;
+    align-items: center;
+    padding: 14px 14px 14px 12px;
+    cursor: pointer;
+    gap: 12px;
+    user-select: none;
+  }
+
+  .exercise-number {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 13px;
+    color: var(--muted);
+    width: 18px;
+    flex-shrink: 0;
+  }
+
+  .exercise-main {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .exercise-name {
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--text);
+    line-height: 1.2;
+    margin-bottom: 4px;
+  }
+
+  .exercise-meta {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+
+  .badge {
+    font-size: 11px;
+    color: #fff;
+    background: var(--accent);
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-weight: 500;
+    white-space: nowrap;
+  }
+
+  .badge.secondary {
+    background: var(--peach-light);
+    color: var(--peach);
+    border: 1px solid #f0c4ae;
+  }
+
+  .chevron {
+    color: var(--muted);
+    font-size: 20px;
+    transition: transform 0.2s;
+    flex-shrink: 0;
+    line-height: 1;
+  }
+
+  .exercise-card.open .chevron {
+    transform: rotate(180deg);
+    color: var(--accent);
+  }
+
+  /* EXPANDED CONTENT */
+  .exercise-body {
+    display: none;
+    border-top: 1px solid var(--border);
+    padding: 14px;
+    background: #fafaf6;
+  }
+
+  .exercise-card.open .exercise-body { display: block; }
+
+  .section-label {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    color: var(--peach);
+    font-weight: 500;
+    margin-bottom: 8px;
+    margin-top: 14px;
+  }
+
+  .section-label:first-child { margin-top: 0; }
+
+  .step-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+  }
+
+  .step-list li {
+    font-size: 13px;
+    color: #4a4040;
+    line-height: 1.55;
+    padding-left: 18px;
+    position: relative;
+  }
+
+  .step-list li::before {
+    content: '→';
+    position: absolute;
+    left: 0;
+    color: var(--accent);
+    font-size: 11px;
+    top: 2px;
+  }
+
+  .error-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+  }
+
+  .error-list li {
+    font-size: 13px;
+    color: #4a4040;
+    line-height: 1.55;
+    padding-left: 18px;
+    position: relative;
+  }
+
+  .error-list li::before {
+    content: '✕';
+    position: absolute;
+    left: 0;
+    color: var(--peach);
+    font-size: 10px;
+    top: 3px;
+  }
+
+  .tip-box {
+    background: var(--accent-light);
+    border-left: 3px solid var(--accent);
+    padding: 10px 12px;
+    border-radius: 0 6px 6px 0;
+    margin-top: 14px;
+    font-size: 12px;
+    color: #3a5a65;
+    line-height: 1.6;
+    font-style: italic;
+  }
+
+  /* TIMER */
+  .timer-section {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: var(--surface);
+    border-top: 2px solid var(--border);
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    z-index: 200;
+  }
+
+  .timer-label {
+    font-size: 10px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    white-space: nowrap;
+  }
+
+  .timer-display {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 30px;
+    color: var(--accent);
+    line-height: 1;
+    min-width: 56px;
+  }
+
+  .timer-display.running { color: var(--peach); }
+
+  .timer-progress {
+    flex: 1;
+    height: 5px;
+    background: var(--border);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+
+  .timer-progress-bar {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 3px;
+    transition: width 1s linear, background 0.3s;
+    width: 100%;
+  }
+
+  .timer-progress-bar.running { background: var(--peach); }
+
+  .timer-btn {
+    padding: 8px 16px;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 16px;
+    letter-spacing: 1.5px;
+    transition: all 0.15s;
+  }
+
+  .timer-btn.start {
+    background: var(--accent);
+    color: #fff;
+  }
+
+  .timer-btn.stop {
+    background: var(--peach);
+    color: #fff;
+  }
+
+  .timer-btn.reset {
+    background: var(--surface2);
+    color: var(--muted);
+    border: 1px solid var(--border);
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-top">
+    <h1>GIMNASIO</h1>
+    <span class="subtitle">Tabla fuerza · 2 días</span>
+  </div>
+  <div class="tabs">
+    <button class="tab active" onclick="switchDay('a', this)">DÍA A</button>
+    <button class="tab" onclick="switchDay('b', this)">DÍA B</button>
+  </div>
+</div>
+
+<!-- DÍA A -->
+<div class="day-panel active" id="day-a">
+  <div class="stats-row">
+    <div class="stat"><div class="stat-value">5</div><div class="stat-label">ejercicios</div></div>
+    <div class="stat"><div class="stat-value">~32'</div><div class="stat-label">duración</div></div>
+    <div class="stat"><div class="stat-value">60"</div><div class="stat-label">descanso</div></div>
+  </div>
+
+  <div class="exercise-card" id="card-warmup-a" style="border-color: #b8d8e4; background: var(--accent-light);">
+    <div class="exercise-header" onclick="toggleCard('warmup-a')">
+      <span class="exercise-number" style="color: var(--accent);">↑</span>
+      <div class="exercise-main">
+        <div class="exercise-name" style="color: var(--accent);">Calentamiento · 3–4 min</div>
+        <div class="exercise-meta">
+          <span class="badge" style="background: var(--accent);">Movilidad articular</span>
+        </div>
+      </div>
+      <span class="chevron">⌄</span>
+    </div>
+    <div class="exercise-body" style="background: var(--accent-light);">
+      <div class="section-label">Cadera · Tobillo · Torso</div>
+      <ul class="step-list">
+        <li><strong>Rotaciones de cadera en círculo</strong> — 10 cada lado. De pie, manos en caderas, traza círculos amplios con la pelvis</li>
+        <li><strong>Sentadilla de movilidad con pausa</strong> — 8 reps lentas sin peso. Baja hasta el fondo, aguanta 2 segundos abajo y sube</li>
+        <li><strong>Rotación de torso de pie</strong> — 10 cada lado. Brazos extendidos al frente, gira el torso de lado a lado manteniendo las caderas quietas</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="exercise-card" id="card-a1">
+    <div class="exercise-header" onclick="toggleCard('a1')">
+      <span class="exercise-number">01</span>
+      <div class="exercise-main">
+        <div class="exercise-name">Goblet Squat</div>
+        <div class="exercise-meta">
+          <span class="badge">3 × 10</span>
+          <span class="badge secondary">Piernas · Core</span>
+        </div>
+      </div>
+      <span class="chevron">⌄</span>
+    </div>
+    <div class="exercise-body">
+      <div class="section-label">Cómo hacerlo</div>
+      <ul class="step-list">
+        <li>Agarra una mancuerna vertical con las dos manos a la altura del pecho, codos apuntando hacia abajo</li>
+        <li>Pies a la anchura de los hombros, punteras ligeramente abiertas hacia fuera</li>
+        <li>Baja como si fuera a sentarte en una silla, rodillas siguiendo la dirección de los pies</li>
+        <li>Desciende hasta que los muslos estén paralelos al suelo o un poco más abajo</li>
+        <li>Empuja el suelo para subir, expirando en el esfuerzo</li>
+      </ul>
+      <div class="section-label">Errores típicos</div>
+      <ul class="error-list">
+        <li>Rodillas que se juntan hacia dentro al subir</li>
+        <li>Talones que se levantan del suelo (señal de falta de movilidad de tobillo)</li>
+        <li>Torso que cae demasiado hacia delante</li>
+      </ul>
+      <div class="tip-box">💡 Empieza con una mancuerna ligera (8–12 kg). La mancuerna frente al pecho te ayuda a mantener el torso erguido naturalmente.</div>
+    </div>
+  </div>
+
+  <div class="exercise-card" id="card-a2">
+    <div class="exercise-header" onclick="toggleCard('a2')">
+      <span class="exercise-number">02</span>
+      <div class="exercise-main">
+        <div class="exercise-name">Press Mancuernas Inclinado</div>
+        <div class="exercise-meta">
+          <span class="badge">3 × 10</span>
+          <span class="badge secondary">Pecho · Hombros</span>
+        </div>
+      </div>
+      <span class="chevron">⌄</span>
+    </div>
+    <div class="exercise-body">
+      <div class="section-label">Cómo hacerlo</div>
+      <ul class="step-list">
+        <li>Banco inclinado a 30–45°. Siéntate con las mancuernas en los muslos, luego acuéstate llevándolas a la altura del pecho</li>
+        <li>Mancuernas a la altura de los pectorales, codos a 45° respecto al torso</li>
+        <li>Empuja hacia arriba y ligeramente hacia el centro hasta casi juntar las mancuernas</li>
+        <li>Baja controlado, sin dejar caer el peso</li>
+      </ul>
+      <div class="section-label">Errores típicos</div>
+      <ul class="error-list">
+        <li>Codos muy abiertos a 90°: carga excesiva en el hombro</li>
+        <li>Rebotar el peso abajo sin control</li>
+        <li>Arquear la espalda baja para empujar más</li>
+      </ul>
+      <div class="tip-box">💡 Sin banco inclinado libre, puedes hacer press plano en el suelo. Igualmente válido para empezar.</div>
+    </div>
+  </div>
+
+  <div class="exercise-card" id="card-a3">
+    <div class="exercise-header" onclick="toggleCard('a3')">
+      <span class="exercise-number">03</span>
+      <div class="exercise-main">
+        <div class="exercise-name">Remo Mancuerna a Una Mano</div>
+        <div class="exercise-meta">
+          <span class="badge">3 × 10 · cada lado</span>
+          <span class="badge secondary">Espalda · Bíceps</span>
+        </div>
+      </div>
+      <span class="chevron">⌄</span>
+    </div>
+    <div class="exercise-body">
+      <div class="section-label">Cómo hacerlo</div>
+      <ul class="step-list">
+        <li>Apoya la rodilla y la mano del mismo lado en un banco, espalda paralela al suelo</li>
+        <li>Con la mano libre coge la mancuerna, brazo extendido hacia el suelo</li>
+        <li>Tira del codo hacia el techo, llevando la mancuerna hacia la cadera, no hacia el hombro</li>
+        <li>Aguanta 1 segundo arriba, baja controlado</li>
+      </ul>
+      <div class="section-label">Errores típicos</div>
+      <ul class="error-list">
+        <li>Rotar el torso para ayudar con impulso</li>
+        <li>Tirar con el bíceps en lugar de pensar en el codo</li>
+        <li>Espalda redondeada o caída hacia abajo</li>
+      </ul>
+      <div class="tip-box">💡 Truco mental: imagina que tienes una naranja bajo la axila y la estás aplastando al subir el codo. Activa el dorsal automáticamente.</div>
+    </div>
+  </div>
+
+  <div class="exercise-card" id="card-a4">
+    <div class="exercise-header" onclick="toggleCard('a4')">
+      <span class="exercise-number">04</span>
+      <div class="exercise-main">
+        <div class="exercise-name">Zancadas con Mancuernas</div>
+        <div class="exercise-meta">
+          <span class="badge">2 × 10 · cada pierna</span>
+          <span class="badge secondary">Piernas · Glúteos</span>
+        </div>
+      </div>
+      <span class="chevron">⌄</span>
+    </div>
+    <div class="exercise-body">
+      <div class="section-label">Cómo hacerlo</div>
+      <ul class="step-list">
+        <li>De pie con una mancuerna en cada mano a los lados</li>
+        <li>Da un paso largo hacia delante con una pierna</li>
+        <li>Baja la rodilla trasera hacia el suelo sin llegar a tocarlo</li>
+        <li>Rodilla delantera no debe sobrepasar la punta del pie</li>
+        <li>Empuja con el talón delantero para volver y alterna piernas</li>
+      </ul>
+      <div class="section-label">Errores típicos</div>
+      <ul class="error-list">
+        <li>Paso demasiado corto: rodilla delantera se va hacia delante</li>
+        <li>Torso inclinado hacia delante en lugar de recto</li>
+        <li>Rodilla delantera que colapsa hacia dentro</li>
+      </ul>
+      <div class="tip-box">💡 Si pierdes el equilibrio, empieza sin mancuernas. El patrón de movimiento primero, el peso después.</div>
+    </div>
+  </div>
+
+  <div class="exercise-card" id="card-a5">
+    <div class="exercise-header" onclick="toggleCard('a5')">
+      <span class="exercise-number">05</span>
+      <div class="exercise-main">
+        <div class="exercise-name">Plancha</div>
+        <div class="exercise-meta">
+          <span class="badge">3 × 30"</span>
+          <span class="badge secondary">Core</span>
+        </div>
+      </div>
+      <span class="chevron">⌄</span>
+    </div>
+    <div class="exercise-body">
+      <div class="section-label">Cómo hacerlo</div>
+      <ul class="step-list">
+        <li>Apoya antebrazos y puntas de los pies en el suelo</li>
+        <li>Cuerpo en línea recta de cabeza a talones</li>
+        <li>Aprieta el abdomen como si fuera a recibir un golpe</li>
+        <li>Respira con normalidad, no aguantes la respiración</li>
+      </ul>
+      <div class="section-label">Errores típicos</div>
+      <ul class="error-list">
+        <li>Cadera que sube (posición de pirámide) o que cae</li>
+        <li>Cabeza caída o mirando hacia arriba</li>
+        <li>Aguantar sin tensión real: parecer que aguantas no es lo mismo que activar</li>
+      </ul>
+      <div class="tip-box">💡 Si 30" es demasiado al principio, empieza con 15–20" y aumenta progresivamente. La calidad de la posición vale más que el tiempo.</div>
+    </div>
+  </div>
+</div>
+
+<!-- DÍA B -->
+<div class="day-panel" id="day-b">
+  <div class="stats-row">
+    <div class="stat"><div class="stat-value">5</div><div class="stat-label">ejercicios</div></div>
+    <div class="stat"><div class="stat-value">~32'</div><div class="stat-label">duración</div></div>
+    <div class="stat"><div class="stat-value">60"</div><div class="stat-label">descanso</div></div>
+  </div>
+
+  <div class="exercise-card" id="card-warmup-b" style="border-color: #b8d8e4; background: var(--accent-light);">
+    <div class="exercise-header" onclick="toggleCard('warmup-b')">
+      <span class="exercise-number" style="color: var(--accent);">↑</span>
+      <div class="exercise-main">
+        <div class="exercise-name" style="color: var(--accent);">Calentamiento · 3–4 min</div>
+        <div class="exercise-meta">
+          <span class="badge" style="background: var(--accent);">Movilidad articular</span>
+        </div>
+      </div>
+      <span class="chevron">⌄</span>
+    </div>
+    <div class="exercise-body" style="background: var(--accent-light);">
+      <div class="section-label">Cadena posterior · Hombros · Columna</div>
+      <ul class="step-list">
+        <li><strong>Bisagra de cadera sin peso</strong> — 10 reps. El mismo patrón del Romanian Deadlift pero sin mancuernas, lento y controlado</li>
+        <li><strong>Rotaciones de hombro con brazo extendido</strong> — 10 cada lado. Brazo estirado, traza círculos amplios hacia delante y hacia atrás</li>
+        <li><strong>Gato-vaca de pie</strong> — 8 reps. De pie con rodillas ligeramente flexionadas, alterna entre redondear y arquear la columna de forma fluida</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="exercise-card" id="card-b1">
+    <div class="exercise-header" onclick="toggleCard('b1')">
+      <span class="exercise-number">01</span>
+      <div class="exercise-main">
+        <div class="exercise-name">Romanian Deadlift</div>
+        <div class="exercise-meta">
+          <span class="badge">3 × 10</span>
+          <span class="badge secondary">Isquios · Glúteos</span>
+        </div>
+      </div>
+      <span class="chevron">⌄</span>
+    </div>
+    <div class="exercise-body">
+      <div class="section-label">Cómo hacerlo</div>
+      <ul class="step-list">
+        <li>De pie, mancuernas frente a los muslos con las palmas hacia ti</li>
+        <li>Pies a la anchura de las caderas, rodillas ligeramente flexionadas</li>
+        <li>Empuja las caderas hacia atrás (bisagra de cadera) mientras bajas las mancuernas pegadas a las piernas</li>
+        <li>Baja hasta sentir tensión en los isquiotibiales, normalmente a media tibia</li>
+        <li>Empuja caderas hacia delante para volver arriba, apretando glúteos al final</li>
+      </ul>
+      <div class="section-label">Errores típicos</div>
+      <ul class="error-list">
+        <li>Doblar las rodillas en exceso (no es una sentadilla, es bisagra de cadera)</li>
+        <li>Redondear la espalda baja al bajar</li>
+        <li>Mancuernas que se separan del cuerpo</li>
+      </ul>
+      <div class="tip-box">💡 Imagina que empujas una pared invisible con las caderas hacia atrás. Si sientes tensión en los isquiotibiales, lo estás haciendo bien.</div>
+    </div>
+  </div>
+
+  <div class="exercise-card" id="card-b2">
+    <div class="exercise-header" onclick="toggleCard('b2')">
+      <span class="exercise-number">02</span>
+      <div class="exercise-main">
+        <div class="exercise-name">Press de Hombro Sentado</div>
+        <div class="exercise-meta">
+          <span class="badge">3 × 10</span>
+          <span class="badge secondary">Hombros · Tríceps</span>
+        </div>
+      </div>
+      <span class="chevron">⌄</span>
+    </div>
+    <div class="exercise-body">
+      <div class="section-label">Cómo hacerlo</div>
+      <ul class="step-list">
+        <li>Sentado en un banco, mancuernas a la altura de los hombros, codos a 90°</li>
+        <li>Palmas mirando hacia delante</li>
+        <li>Empuja hacia arriba hasta casi juntar las mancuernas sobre la cabeza</li>
+        <li>Baja controlado de vuelta a la posición inicial</li>
+      </ul>
+      <div class="section-label">Errores típicos</div>
+      <ul class="error-list">
+        <li>Arquear la zona lumbar al empujar (aprieta el core)</li>
+        <li>Bajar las mancuernas por debajo de los hombros innecesariamente</li>
+        <li>Usar impulso del cuerpo para completar las repeticiones</li>
+      </ul>
+      <div class="tip-box">💡 Empieza con poco peso. Los hombros son una articulación delicada y la técnica aquí es especialmente importante.</div>
+    </div>
+  </div>
+
+  <div class="exercise-card" id="card-b3">
+    <div class="exercise-header" onclick="toggleCard('b3')">
+      <span class="exercise-number">03</span>
+      <div class="exercise-main">
+        <div class="exercise-name">Curl de Bíceps</div>
+        <div class="exercise-meta">
+          <span class="badge">2 × 12</span>
+          <span class="badge secondary">Bíceps</span>
+        </div>
+      </div>
+      <span class="chevron">⌄</span>
+    </div>
+    <div class="exercise-body">
+      <div class="section-label">Cómo hacerlo</div>
+      <ul class="step-list">
+        <li>De pie, mancuernas a los lados con palmas mirando hacia delante</li>
+        <li>Codos pegados al torso, sin moverse durante el ejercicio</li>
+        <li>Sube la mancuerna girando la muñeca ligeramente hacia fuera al llegar arriba</li>
+        <li>Baja lento (2–3 segundos), sin dejar caer el peso</li>
+      </ul>
+      <div class="section-label">Errores típicos</div>
+      <ul class="error-list">
+        <li>Codos que se separan o se mueven hacia delante para ayudar</li>
+        <li>Balanceo del torso para generar impulso</li>
+        <li>Bajar demasiado rápido perdiendo la tensión</li>
+      </ul>
+      <div class="tip-box">💡 La fase de bajada (excéntrica) es donde más se desarrolla el músculo. No la regales siendo descuidado.</div>
+    </div>
+  </div>
+
+  <div class="exercise-card" id="card-b4">
+    <div class="exercise-header" onclick="toggleCard('b4')">
+      <span class="exercise-number">04</span>
+      <div class="exercise-main">
+        <div class="exercise-name">Extensión de Tríceps</div>
+        <div class="exercise-meta">
+          <span class="badge">2 × 12</span>
+          <span class="badge secondary">Tríceps</span>
+        </div>
+      </div>
+      <span class="chevron">⌄</span>
+    </div>
+    <div class="exercise-body">
+      <div class="section-label">Cómo hacerlo</div>
+      <ul class="step-list">
+        <li>De pie o sentado, agarra una mancuerna con ambas manos por encima de la cabeza</li>
+        <li>Codos apuntando hacia el techo, pegados a la cabeza</li>
+        <li>Baja la mancuerna detrás de la cabeza doblando los codos</li>
+        <li>Extiende los brazos de vuelta arriba sin mover los codos</li>
+      </ul>
+      <div class="section-label">Errores típicos</div>
+      <ul class="error-list">
+        <li>Codos que se abren hacia los lados al bajar</li>
+        <li>Mover los hombros en lugar de aislar el movimiento en el codo</li>
+        <li>Peso excesivo que compromete el rango de movimiento</li>
+      </ul>
+      <div class="tip-box">💡 Puedes hacerlo también tumbado en un banco (skull crusher con mancuernas), que a veces es más cómodo para la muñeca.</div>
+    </div>
+  </div>
+
+  <div class="exercise-card" id="card-b5">
+    <div class="exercise-header" onclick="toggleCard('b5')">
+      <span class="exercise-number">05</span>
+      <div class="exercise-main">
+        <div class="exercise-name">Plancha</div>
+        <div class="exercise-meta">
+          <span class="badge">3 × 30"</span>
+          <span class="badge secondary">Core</span>
+        </div>
+      </div>
+      <span class="chevron">⌄</span>
+    </div>
+    <div class="exercise-body">
+      <div class="section-label">Cómo hacerlo</div>
+      <ul class="step-list">
+        <li>Apoya antebrazos y puntas de los pies en el suelo</li>
+        <li>Cuerpo en línea recta de cabeza a talones</li>
+        <li>Aprieta el abdomen como si fuera a recibir un golpe</li>
+        <li>Respira con normalidad, no aguantes la respiración</li>
+      </ul>
+      <div class="section-label">Errores típicos</div>
+      <ul class="error-list">
+        <li>Cadera que sube (posición de pirámide) o que cae</li>
+        <li>Cabeza caída o mirando hacia arriba</li>
+        <li>Aguantar sin tensión real: parecer que aguantas no es lo mismo que activar</li>
+      </ul>
+      <div class="tip-box">💡 Si 30" es demasiado al principio, empieza con 15–20" y aumenta progresivamente. La calidad de la posición vale más que el tiempo.</div>
+    </div>
+  </div>
+</div>
+
+<!-- TIMER -->
+<div class="timer-section">
+  <div>
+    <div class="timer-label">Descanso</div>
+    <div class="timer-display" id="timer-display">1:00</div>
+  </div>
+  <div class="timer-progress">
+    <div class="timer-progress-bar" id="timer-bar"></div>
+  </div>
+  <button class="timer-btn start" id="timer-btn" onclick="toggleTimer()">START</button>
+  <button class="timer-btn reset" onclick="resetTimer()">↺</button>
+</div>
+
+<script>
+  function switchDay(day, el) {
+    document.querySelectorAll('.day-panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.getElementById('day-' + day).classList.add('active');
+    el.classList.add('active');
+  }
+
+  function toggleCard(id) {
+    const card = document.getElementById('card-' + id);
+    const isOpen = card.classList.contains('open');
+    document.querySelectorAll('.exercise-card').forEach(c => c.classList.remove('open'));
+    if (!isOpen) card.classList.add('open');
+  }
+
+  let timerInterval = null;
+  let timeLeft = 60;
+  const totalTime = 60;
+  let running = false;
+
+  function toggleTimer() {
+    if (running) {
+      clearInterval(timerInterval);
+      running = false;
+      document.getElementById('timer-btn').textContent = 'START';
+      document.getElementById('timer-btn').className = 'timer-btn start';
+      document.getElementById('timer-display').classList.remove('running');
+      document.getElementById('timer-bar').classList.remove('running');
+    } else {
+      running = true;
+      document.getElementById('timer-btn').textContent = 'STOP';
+      document.getElementById('timer-btn').className = 'timer-btn stop';
+      document.getElementById('timer-display').classList.add('running');
+      document.getElementById('timer-bar').classList.add('running');
+      timerInterval = setInterval(() => {
+        timeLeft--;
+        updateTimerDisplay();
+        if (timeLeft <= 0) {
+          clearInterval(timerInterval);
+          running = false;
+          document.getElementById('timer-btn').textContent = 'START';
+          document.getElementById('timer-btn').className = 'timer-btn start';
+          document.getElementById('timer-display').classList.remove('running');
+          document.getElementById('timer-bar').classList.remove('running');
+          timeLeft = 60;
+          updateTimerDisplay();
+          if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
+        }
+      }, 1000);
+    }
+  }
+
+  function resetTimer() {
+    clearInterval(timerInterval);
+    running = false;
+    timeLeft = 60;
+    document.getElementById('timer-btn').textContent = 'START';
+    document.getElementById('timer-btn').className = 'timer-btn start';
+    document.getElementById('timer-display').classList.remove('running');
+    document.getElementById('timer-bar').classList.remove('running');
+    updateTimerDisplay();
+  }
+
+  function updateTimerDisplay() {
+    const m = Math.floor(timeLeft / 60);
+    const s = timeLeft % 60;
+    document.getElementById('timer-display').textContent = m + ':' + String(s).padStart(2, '0');
+    const pct = (timeLeft / totalTime) * 100;
+    document.getElementById('timer-bar').style.width = pct + '%';
+  }
+</script>
+
+</body>
+</html>
